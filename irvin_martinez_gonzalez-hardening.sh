@@ -13,20 +13,43 @@
 # Clamav: clamav.net
 # EPEL: docs.fedoraproject.org/en-US/epel/
 
-OS=debian
-if grep "$OS" /etc/os-release 1>/dev/null ; then
-	echo "OS = Debian."
+if grep ubuntu /etc/os-release 1>/dev/null ; then
+	echo "OS = Ubuntu."
 	if apt list --installed 2>/dev/null | grep clamav 2>/dev/null 1>&2 ; then
-		echo "[-] Desinstalando clamav..."
-		sudo apt purge clamav clamav-daemon
-		clear && echo "[X] Clamav desinstalado."
+		echo "\e[1;34;1m [-] Desinstalando clamav... \e[0m"
+		yes '' | sudo apt autoremove clamav clamav-daemon 2>/dev/null 1>&2
+		clear && echo "\e[1;34;1m [X] Clamav desinstalado. \e[0m"
 	fi
-	echo "[-] Instalando clamav..."
-	sudo apt install clamav clamav-daemon
-	clear && echo "[X] Clamav instalado."
+	echo "\e[1;34;1m [-] Instalando clamav... \e[0m"
+	yes '' | sudo apt install clamav clamav-daemon 2>/dev/null 1>&2
+	clear && echo "\e[1;34;1m [X] Clamav instalado. \e[0m"
 
-	echo "[-] Actualizando paquetes..."
-	sudo apt update && apt upgrade
+	echo "\e[1;34;1m [-] Actualizando paquetes... \e[0m"
+	yes '' | sudo apt update 2>/dev/null 1>&2 && yes '' | sudo apt upgrade 2>/dev/null 1>&2
+	echo "\e[1;34;1m [X] Paquetes actualizados. \e[0m"
+
+	echo "\e[1;34;1m [X] Listo \e[0m"
+
 else
-	echo "CentOS"
+	echo "OS = CentOS."
+	if ! yum list installed | grep epel-release 1>/dev/null ; then
+		echo -e "\e[1;34;1m [-] Instalando epel-release...\n \e[0m"
+		sudo yum -y install epel-release && sudo yum clean all 1>/dev/null
+		clear && echo "\e[1;34;1m [X] epel-release instalado. \e[0m"
+	fi
+
+	if yum list installed | grep clamav 1>/dev/null ; then
+		echo -e "\e[1;34;1m [-] Desinstalando clamav... \e[0m"
+		sudo yum -y remove clamav-server clamav-data clamav-update clamav-filesystem clamav clamav-scanner-systemd clamav-devel clamav-lib clamav-server-systemd 2>/dev/null 1>&2
+		clear && echo -e "\e[1;34;1m [X] Clamav desinstalado. \e[0m"
+	fi
+	echo -e "\e[1;34;1m [-] Instalando clamav... \e[0m"
+	sudo yum -y install clamav-server clamav-data clamav-update clamav-filesystem clamav clamav-scanner-systemd clamav-devel clamav-lib clamav-server-systemd 2>/dev/null 1>&2
+	clear && echo -e "\e[1;34;1m [X] Clamav instalado. \e[0m"
+
+	echo -e "\e[1;34;1m [-] Actualizando paquetes... \e[0m"
+	sudo yum -y update 1>/dev/null
+	echo -e "\e[1;34;1m [X] Paquetes actualizados. \e[0m"
+	echo -e "\e[1;34;1m [X] Listo \e[0m"
 fi
+
